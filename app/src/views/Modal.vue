@@ -1,13 +1,6 @@
-<script>
-export default {
-    name: 'Modal',
-    methods: {
-        close() {
-            this.$emit('close');
-        },
-    },
-};
-</script>
+<!-- <script>
+
+</script> -->
 
 <template>
     <transition name="modal-fade">
@@ -22,38 +15,113 @@ export default {
                 <section class="modal-body" id="modalDescription">
                     <slot name="body">
                         <div>
-                            <form>
+                            <form @submit.prevent="create">
                                 <div class="form-content">
                                     <div class="form-group">
                                         <label class="label">Full Name</label>
-                                        <input class="form-control" type="text" name="full_name" />
+                                        <input class="form-control" type="text" v-model="name" required />
                                     </div>
                                     <div class="form-group">
                                         <label class="label">Description</label>
-                                        <input class="form-control" type="text" name="full_name" />
+                                        <input class="form-control" type="text" v-model="description" required />
                                     </div>
                                     <div class="form-group">
                                         <label class="label">Quantity</label>
-                                        <input class="form-control" type="text" name="full_name" />
-                                    </div>                                    
+                                        <input class="form-control" type="number" min="0" v-model="quantity" required />
+                                    </div>
                                 </div>
 
                                 <div class="submit-section">
                                     <button type="submit" class="btn btn-green" @click="close">Submit</button>
                                 </div>
-                            </form>                            
+                            </form>
                         </div>
 
                     </slot>
                 </section>
-
-                <footer class="modal-footer">
-
-                </footer>
             </div>
         </div>
     </transition>
 </template>
+
+<script>
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import { RouterLink, RouterView } from 'vue-router';
+
+
+export default {
+    name: 'Modal',
+    methods: {
+        close() {
+            this.$emit('close');
+        },
+    },
+    data() {
+        return {
+            name: '',
+            description: '',
+            quantity: '',
+            api_url: import.meta.env.VITE_API_ENDPOINT
+        };
+    },
+    methods: {
+        async create() {
+            const formData = new FormData();
+            formData.append('name', this.name);
+            formData.append('description', this.description);
+            formData.append('quantity', this.quantity);
+            try {
+                let response = await axios.post(this.api_url + '/assessment/store', formData, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.data) {
+                    Swal.fire({
+                        text: "Assessment created successfully",
+                        icon: 'success',
+                        showCancelButton: false,
+                        confirmButtonColor: '#247',
+                        cancelButtonColor: '#CC9933',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to the home page
+                            window.location.reload()
+                        }
+                    });
+                }
+            } catch (error) {
+                if (error.response && error.response.status == 422) {
+                    // Validation error, display error messages
+                    const errors = error.response.data.data;
+
+                    // Prepare an error message string
+                    let errorMessage = "Validation Error:\n";
+                    for (const field in errors) {
+                        errorMessage += `${errors[field].join(', ')}\n`;
+                    }
+
+                    // Display the error message in SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Failed',
+                        text: errorMessage,
+                    });
+                } else {
+                    // Other errors, log them for debugging
+                    console.log(error);
+                }
+            }
+        }
+    },
+};
+
+</script>
+
 
 <style>
 .modal-backdrop {
@@ -105,12 +173,12 @@ export default {
 }
 
 .btn {
-  color: #fff;
-  font-size: 17px;
-  font-weight: bold;
-  padding: 10px 40px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 10px 40px;
     cursor: pointer;
-  border-radius: 15px;
+    border-radius: 15px;
 }
 
 .btn-green {
@@ -129,10 +197,12 @@ export default {
 .modal-fade-leave-active {
     transition: opacity .5s ease;
 }
+
 form {
     height: auto;
     float: left;
 }
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -147,6 +217,7 @@ form {
 .form-group .label {
     font-size: 15px;
 }
+
 .form-group .form-control {
     width: 100%;
     padding: 15px;

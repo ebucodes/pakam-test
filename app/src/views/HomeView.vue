@@ -25,132 +25,35 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" />
-                </td>
-                <td>Enter Name</td>
-                <td>Enter Description</td>
-                <td>Enter Quantity</td>
-                <td>
-                  <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                  <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
-                </td>
-              </tr>
+              <template v-if="assessments">
+                <tr v-for="(item, index) in assessments" v-bind:key="item">
+                  <td>
+                    <input type="checkbox" />
+                  </td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.description }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>
+                    <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
+                    <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
+                  </td>
+                </tr>
+                <!--  -->
+                <Modal v-show="isModalVisible" @close="closeModal" />
+                <Alert v-show="isAlertVisible" @close="closeAlert" />
+              </template>
+              <template v-else>
+                <tr>
+                  <th colspan="13" class="text-center">No Record Available</th>
+                </tr>
+              </template>
+              <!--  -->
+
             </tbody>
           </table>
         </div>
       </div>
-      <Modal v-show="isModalVisible" @close="closeModal" />
-      <Alert v-show="isAlertVisible" @close="closeAlert" />
+
     </main>
 
   </div>
@@ -159,6 +62,9 @@
 <script>
 import Modal from './Modal.vue';
 import Alert from './Alert.vue';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
 export default {
   components: {
     Modal,
@@ -166,23 +72,64 @@ export default {
   },
   data() {
     return {
+      assessments: "",
       isModalVisible: false,
       isAlertVisible: false,
+      api_url: import.meta.env.VITE_API_ENDPOINT
     };
   },
   methods: {
+
+    async fetchAssessments() {
+      try {
+        let response = await axios.get(this.api_url + '/assessment/list', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            // 'Authorization': this.auth
+          }
+        });
+
+        this.assessments = response.data.data;
+        // console.log(this.assessments);
+      } catch (error) {
+        console.log(error);
+        // if (error.response && error.response.status === 401) {
+        //   // Unauthorized, show SweetAlert and redirect to login
+        //   Swal.fire({
+        //     icon: 'error',
+        //     title: 'Unauthorized',
+        //     text: 'You are not authorized. Please log in.',
+        //   }).then(() => {
+        //     // Redirect to login page
+        //     this.$router.push({ name: 'login' });
+        //   });
+        // } else {
+        //   // Handle other errors
+        //   console.log(error);
+        // }
+      }
+    },
+
+    // 
     showModal() {
       this.isModalVisible = true;
     },
+    // 
     closeModal() {
       this.isModalVisible = false;
     },
+    // 
     showAlert() {
       this.isAlertVisible = true;
     },
+    // 
     closeAlert() {
       this.isAlertVisible = false;
     }
+  },
+  mounted() {
+    this.fetchAssessments();
   }
 };
 </script>

@@ -24,12 +24,19 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 });
+
 //
-Route::middleware('auth:sanctum')->group(function () {
-    Route::group(['prefix' => 'assessment'], function () {
-        Route::get('list', [AssessmentController::class, 'index']);
-        Route::post('store', [AssessmentController::class, 'store']);
-        Route::put('update/{id}', [AssessmentController::class, 'update']);
-        Route::delete('delete/{id}', [AssessmentController::class, 'destroy']);
-    });
+Route::group(['prefix' => 'assessment'], function () {
+    Route::get('list', [AssessmentController::class, 'index']);
+    Route::post('store', [AssessmentController::class, 'store']);
+    Route::put('update/{id}', [AssessmentController::class, 'update']);
+    Route::delete('delete/{id}', [AssessmentController::class, 'destroy']);
 });
+// Route::middleware('userAuth')->group(function () {
+//     Route::group(['prefix' => 'assessment'], function () {
+//         Route::get('list', [AssessmentController::class, 'index']);
+//         Route::post('store', [AssessmentController::class, 'store']);
+//         Route::put('update/{id}', [AssessmentController::class, 'update']);
+//         Route::delete('delete/{id}', [AssessmentController::class, 'destroy']);
+//     });
+// });

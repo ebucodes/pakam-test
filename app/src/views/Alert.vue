@@ -15,14 +15,14 @@ export default {
             <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalDescription">
                 <header class="modal-header" id="modalTitle">
                     <slot name="header">
-                        <h2>Delete Waste Category</h2>   
+                        <h2>Delete Waste Category</h2>
                     </slot>
                 </header>
 
                 <section class="modal-body" id="modalDescription">
                     <slot name="body">
-                        <div> 
-                            <p>Are you sure you want to delete this waste category?</p>                       
+                        <div>
+                            <p>Are you sure you want to delete this waste category?</p>
                         </div>
 
                     </slot>
@@ -30,14 +30,47 @@ export default {
 
                 <footer class="modal-footer">
                     <slot name="footer">
-                       
-                        
+
+
                         <div class="footer-section">
                             <button type="submit" class="btn btn-transparent" @click="close">Cancel</button>
                             <button type="submit" class="btn btn-red" @click="close">Delete</button>
                         </div>
                     </slot>
-                    
+
+                </footer>
+            </div>
+        </div>
+    </transition>
+
+    <transition name="modal-fade">
+        <div class="modal-backdrop alert">
+            <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalDescription">
+                <header class="modal-header" id="modalTitle">
+                    <slot name="header">
+                        <h2>Delete Waste Category</h2>
+                    </slot>
+                </header>
+
+                <section class="modal-body" id="modalDescription">
+                    <slot name="body">
+                        <div>
+                            <p>Are you sure you want to delete this waste category?</p>
+                        </div>
+
+                    </slot>
+                </section>
+
+                <footer class="modal-footer">
+                    <slot name="footer">
+
+
+                        <div class="footer-section">
+                            <button type="submit" class="btn btn-transparent" @click="close">Cancel</button>
+                            <button type="submit" class="btn btn-red" @click="close">Delete</button>
+                        </div>
+                    </slot>
+
                 </footer>
             </div>
         </div>
@@ -106,6 +139,7 @@ export default {
     border-radius: 10px;
     margin: 3px;
 }
+
 .btn-red {
     color: white;
     background: red !important;
@@ -124,6 +158,7 @@ export default {
 .modal-fade-leave-active {
     transition: opacity .5s ease;
 }
+
 .footer-section {
     text-align: right;
 }
@@ -131,5 +166,4 @@ export default {
 .modal-footer {
     padding: 10px;
 }
-
 </style>

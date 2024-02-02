@@ -26,7 +26,7 @@ import AuthLayout from '@/components/Layouts/AuthLayout.vue'
                                 <div class="must-be-8">Must be 8 characters long, Uppercase inclusive</div>
                             </div>
 
-                            <button type="submit" class="btn btn-lg btn-success w-50"
+                            <button type="submit" class="btn btn-lg btn-success w-100"
                                 style="background-color: #005700;color: #fff; text-align: center;">Login</button>
 
 
@@ -76,6 +76,7 @@ export default {
                 });
 
                 if (response.data) {
+                    localStorage.setItem('pakamToken', JSON.stringify(response.data.authorization.token));
                     Swal.fire({
                         text: "Login Successfully",
                         icon: 'success',
@@ -87,6 +88,7 @@ export default {
                         if (result.isConfirmed) {
                             // Redirect to the home page
                             this.$router.push({ name: 'home' });
+                            // console.log(response.data.authorization.token);
                         }
                     });
                 }
@@ -96,16 +98,16 @@ export default {
                     const errors = error.response.data.data;
 
                     // Prepare an error message string
-                    let errorMessage = "Validation Error:\n";
-                    for (const field in errors) {
-                        errorMessage += `${errors[field].join(', ')}\n`;
-                    }
+                    // let errorMessage = "Validation Error:\n";
+                    // for (const field in errors) {
+                    //     errorMessage += `${errors[field].join(', ')}\n`;
+                    // }
 
                     // Display the error message in SweetAlert
                     Swal.fire({
                         icon: 'error',
-                        title: 'Validation Failed',
-                        text: errorMessage,
+                        title: 'Invalid Credentials',
+                        // text: errorMessage,
                     });
                 } else {
                     // Other errors, log them for debugging

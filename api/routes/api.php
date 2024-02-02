@@ -33,20 +33,3 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('delete/{id}', [AssessmentController::class, 'destroy']);
     });
 });
-
-
-
-
-// Route::middleware('userAuth')->group(function () {
-//     // Your authenticated routes go here
-//     Route::group(['prefix' => 'assessment'], function () {
-//         Route::get('list', [AssessmentController::class, 'index']);
-//         Route::post('store', [AssessmentController::class, 'store']);
-//         Route::put('update/{id}', [AssessmentController::class, 'update']);
-//         Route::delete('delete/{id}', [AssessmentController::class, 'destroy']);
-//     });
-// });
-
-// Route::post('/register', [AuthController::class, 'createUser']);
-// Route::post('/login', [AuthController::class, 'signIn']);
-//

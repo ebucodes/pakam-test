@@ -19,20 +19,22 @@
                                             <input class="frame-5" placeholder="First name" type="text" />
                                             <div class="input-2">
                                                 <input class="enter-your-first" placeholder="Enter your First 0name"
-                                                    type="text" />
+                                                    type="text" required />
                                             </div>
                                         </div>
                                         <div class="input">
                                             <input class="frame-5" placeholder="Last name" type="text" />
                                             <div class="input-3">
-                                                <input class="div-2" placeholder="Enter your Last name" type="text" />
+                                                <input class="div-2" placeholder="Enter your Last name" type="text"
+                                                    required />
                                                 <Property35 class="input-outline-status" />
                                             </div>
                                         </div>
                                         <div class="input">
                                             <input class="frame-5" placeholder="Username" type="text" />
                                             <div class="input-3">
-                                                <input class="div-2" placeholder="Enter your username" type="text" />
+                                                <input class="div-2" placeholder="Enter your username" type="text"
+                                                    required />
                                                 <Property35 class="input-outline-status" />
                                             </div>
                                         </div>

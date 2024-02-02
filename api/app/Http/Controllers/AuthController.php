@@ -4,114 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-// use Illuminate\Support\Facades\Validator;
-use Validator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Laravel\Sanctum\PersonalAccessTokenFactory;
+use App\Http\Controllers\BaseController as BaseController;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     //
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        // $validate = Validator::make($request->all(), [
-        //     'first_name' => 'bail|required|string|max:250',
-        //     'last_name' => 'bail|required|string|max:250',
-        //     'username' => 'bail|required|string|max:255|unique:users,username',
-        //     'password' => 'bail|required|string|min:8'
-        // ]);
-        $validate = $request->validate([
-            'first_name' => 'bail|required|string|max:250',
-            'last_name' => 'bail|required|string|max:250',
-            'username' => 'bail|required|string|max:255|unique:users,username',
-            'password' => 'bail|required|string|min:8'
-        ], [
-            'first_name.required' => 'First Name is required',
-            'last_name.required' => 'Last Name is required',
-            'username.required' => 'Username is required',
-            'username.unique' => 'Username is already taken',
-            'password.min' => 'Password is supposed to be more than 8 characters long',
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'username' => 'required',
+            'password' => 'required',
         ]);
 
-        $user = User::create([
-            'first_name' => $validate['first_name'],
-            'last_name' => $validate['last_name'],
-            'username' => $validate['username'],
-            'password' => Hash::make($validate['password'])
-        ]);
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());
+        }
 
-        // if ($validate->fails()) {
-        //     return response()->json([
-        //         'status' => 'failed',
-        //         'message' => 'Validation Error!',
-        //         'data' => $validate->errors(),
-        //     ], 403);
-        // }
+        $input = $request->all();
+        $input['password'] = bcrypt($input['password']);
+        $user = User::create($input);
+        $success['token'] =  $user->createToken('MyApp')->plainTextToken;
+        $success['first_name'] =  $user->first_name;
 
-        // $user = User::create([
-        //     'first_name' => $request->first_name,
-        //     'last_name' => $request->last_name,
-        //     'username' => $request->username,
-        //     'password' => Hash::make($request->password)
-        // ]);
-
-        $data['token'] = $user->createToken($request->username)->plainTextToken;
-        $data['user'] = $user;
-
-        $response = [
-            'status' => 'success',
-            'message' => 'User is created successfully.',
-            'data' => $data,
-        ];
-
-        return response()->json($response, 201);
+        return $this->sendResponse($success, 'User register successfully.');
     }
 
     //
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        $validate = Validator::make($request->all(), [
-            'username' => 'required|string',
-            'password' => 'required|string'
-        ]);
+        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+            $user = Auth::user();
+            $success['token'] =  $user->createToken('MyApp')->plainTextToken;
+            $success['first_name'] =  $user->first_name;
 
-        if ($validate->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Validation Error!',
-                'data' => $validate->errors(),
-            ], 403);
+            return $this->sendResponse($success, 'User login successfully.');
+        } else {
+            return $this->sendError('Unauthorized.', ['error' => 'Unauthorized']);
         }
-
-        // Check email exist
-        $user = User::where('username', $request->username)->first();
-
-        // Check password
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Invalid credentials'
-            ], 401);
-        }
-
-        $data['token'] = $user->createToken($request->username)->plainTextToken;
-        $data['user'] = $user;
-
-        $response = [
-            'status' => 'success',
-            'message' => 'User is logged in successfully.',
-            'data' => $data,
-        ];
-
-        return response()->json($response, 200);
     }
-
-    //
-    // public function logout(Request $request)
-    // {
-    //     auth()->user()->tokens()->delete();
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'User is logged out successfully'
-    //     ], 200);
-    // }
 }

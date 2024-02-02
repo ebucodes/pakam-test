@@ -6,9 +6,7 @@
       <div class="main-content">
         <h1>Assessment</h1>
         <div class="top-area">
-          <button class="btn btn-success" @click="showModal" type="button">Create</button>
-
-
+          <button class="btn btn-success" @click="showCreateModal" type="button">Create</button>
         </div>
         <div class="table-section">
           <!-- <i class="fa fa-address-book" aria-hidden="true"></i> -->
@@ -34,13 +32,14 @@
                   <td>{{ item.description }}</td>
                   <td>{{ item.quantity }}</td>
                   <td>
-                    <button class="btn btn-success btn-sm mx-3" @click="showModal" type="button">Update</button>
-                    <button class="btn btn-outline btn-sm" @click="showAlert" type="button">Delete</button>
+                    <button class="btn btn-success btn-sm mx-3" @click="showModal(item)" type="button">Update</button>
+                    <button class="btn btn-outline btn-sm" @click="showAlert(item)" type="button">Delete</button>
                   </td>
+                  <!--  -->
+                  <Modal v-show="isModalVisible" @close="closeModal" :assessment="item" />
+                  <Alert v-show="isAlertVisible" @close="closeAlert" :assessment="item" />
                 </tr>
-                <!--  -->
-                <Modal v-show="isModalVisible" @close="closeModal" />
-                <Alert v-show="isAlertVisible" @close="closeAlert" />
+                <Modal v-show="isCreateModalVisible" @close="closeModal" />
               </template>
               <template v-else>
                 <tr>
@@ -48,14 +47,11 @@
                 </tr>
               </template>
               <!--  -->
-
             </tbody>
           </table>
         </div>
       </div>
-
     </main>
-
   </div>
 </template>
 
@@ -73,6 +69,8 @@ export default {
   data() {
     return {
       assessments: "",
+      assessment: "",
+      isCreateModalVisible: false,
       isModalVisible: false,
       isAlertVisible: false,
       api_url: import.meta.env.VITE_API_ENDPOINT
@@ -112,19 +110,28 @@ export default {
     },
 
     // 
-    showModal() {
+    showModal(assessment = null) {
+      console.log(assessment);
+      this.assessment = assessment;
       this.isModalVisible = true;
+    },
+    showCreateModal() {
+      this.isCreateModalVisible = true;
     },
     // 
     closeModal() {
+      this.isCreateModalVisible = false;
+      this.assessment = null;
       this.isModalVisible = false;
     },
     // 
-    showAlert() {
+    showAlert(assessment = null) {
+      this.assessment = assessment;
       this.isAlertVisible = true;
     },
     // 
     closeAlert() {
+      this.assessment = null;
       this.isAlertVisible = false;
     }
   },

@@ -32,7 +32,8 @@
                                 </div>
 
                                 <div class="submit-section">
-                                    <button type="submit" class="btn btn-green" @click="close">Submit</button>
+                                    <button class="btn btn-danger" @click="close">Cancel</button>
+                                    <button type="submit" class="btn btn-success" @click="close">Submit</button>
                                 </div>
                             </form>
                         </div>
@@ -49,24 +50,26 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { RouterLink, RouterView } from 'vue-router';
 
-
 export default {
     name: 'Modal',
-    methods: {
-        close() {
-            this.$emit('close');
-        },
-    },
+    props: ['assessment'],
     data() {
         return {
-            name: '',
-            description: '',
-            quantity: '',
+            name: this.assessment ? this.assessment.name : '',
+            description: this.assessment ? this.assessment.description : '',
+            quantity: this.assessment ? this.assessment.quantity : '',
             api_url: import.meta.env.VITE_API_ENDPOINT
         };
     },
     methods: {
+        close() {
+            this.$emit('close');
+        },
         async create() {
+            if (this.assessment) {
+                this.update()
+                return
+            }
             const formData = new FormData();
             formData.append('name', this.name);
             formData.append('description', this.description);
@@ -116,7 +119,61 @@ export default {
                     console.log(error);
                 }
             }
+        },
+        async update() {
+            const formData = new FormData();
+            formData.append('name', this.name);
+            formData.append('description', this.description);
+            formData.append('quantity', this.quantity);
+            try {
+                let response = await axios.put(`${this.api_url}/assessment/update/${this.assessment.id}`, formData, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.data) {
+                    Swal.fire({
+                        text: "Updated Successfully",
+                        icon: 'success',
+                        showCancelButton: false,
+                        confirmButtonColor: '#247',
+                        cancelButtonColor: '#CC9933',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to the home page
+                            window.location.reload()
+                        }
+                    });
+                }
+            } catch (error) {
+                if (error.response && error.response.status == 422) {
+                    // Validation error, display error messages
+                    const errors = error.response.data.data;
+
+                    // Prepare an error message string
+                    let errorMessage = "Validation Error:\n";
+                    for (const field in errors) {
+                        errorMessage += `${errors[field].join(', ')}\n`;
+                    }
+
+                    // Display the error message in SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Failed',
+                        text: errorMessage,
+                    });
+                } else {
+                    // Other errors, log them for debugging
+                    console.log(error);
+                }
+            }
         }
+    },
+    mounted() {
+        console.log(this.assessment)
     },
 };
 

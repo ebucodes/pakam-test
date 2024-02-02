@@ -1,14 +1,3 @@
-<script>
-export default {
-    name: 'Modal',
-    methods: {
-        close() {
-            this.$emit('close');
-        },
-    },
-};
-</script>
-
 <template>
     <transition name="modal-fade">
         <div class="modal-backdrop alert">
@@ -18,64 +7,96 @@ export default {
                         <h2>Delete Waste Category</h2>
                     </slot>
                 </header>
+                <form @submit.prevent="deleteWaste">
+                    <section class="modal-body" id="modalDescription">
+                        <slot name="body">
+                            <div>
+                                <p>Are you sure you want to delete this waste category?</p>
+                            </div>
 
-                <section class="modal-body" id="modalDescription">
-                    <slot name="body">
-                        <div>
-                            <p>Are you sure you want to delete this waste category?</p>
-                        </div>
+                        </slot>
+                    </section>
 
-                    </slot>
-                </section>
-
-                <footer class="modal-footer">
-                    <slot name="footer">
-
-
-                        <div class="footer-section">
-                            <button type="submit" class="btn btn-transparent" @click="close">Cancel</button>
-                            <button type="submit" class="btn btn-red" @click="close">Delete</button>
-                        </div>
-                    </slot>
-
-                </footer>
-            </div>
-        </div>
-    </transition>
-
-    <transition name="modal-fade">
-        <div class="modal-backdrop alert">
-            <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalDescription">
-                <header class="modal-header" id="modalTitle">
-                    <slot name="header">
-                        <h2>Delete Waste Category</h2>
-                    </slot>
-                </header>
-
-                <section class="modal-body" id="modalDescription">
-                    <slot name="body">
-                        <div>
-                            <p>Are you sure you want to delete this waste category?</p>
-                        </div>
-
-                    </slot>
-                </section>
-
-                <footer class="modal-footer">
-                    <slot name="footer">
-
-
-                        <div class="footer-section">
-                            <button type="submit" class="btn btn-transparent" @click="close">Cancel</button>
-                            <button type="submit" class="btn btn-red" @click="close">Delete</button>
-                        </div>
-                    </slot>
-
-                </footer>
+                    <footer class="modal-footer">
+                        <slot name="footer">
+                            <div class="footer-section">
+                                <button class="btn btn-transparent" @click="close">Cancel</button>
+                                <button type="submit" class="btn btn-red" @click="close">Delete</button>
+                            </div>
+                        </slot>
+                    </footer>
+                </form>
             </div>
         </div>
     </transition>
 </template>
+
+<script>
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
+export default {
+    name: 'Modal',
+    props: ['assessment'],
+    data() {
+        return {
+            api_url: import.meta.env.VITE_API_ENDPOINT
+        };
+    },
+    methods: {
+        close() {
+            this.$emit('close');
+        },
+        async deleteWaste() {
+            try {
+                let response = await axios.delete(`${this.api_url}/assessment/delete/${this.assessment.id}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.data) {
+                    Swal.fire({
+                        text: "Delete Successfully",
+                        icon: 'success',
+                        showCancelButton: false,
+                        confirmButtonColor: '#247',
+                        cancelButtonColor: '#CC9933',
+                        confirmButtonText: 'Ok'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to the home page
+                            window.location.reload()
+                        }
+                    });
+                }
+            } catch (error) {
+                if (error.response && error.response.status == 422) {
+                    // Validation error, display error messages
+                    const errors = error.response.data.data;
+
+                    // Prepare an error message string
+                    let errorMessage = "Validation Error:\n";
+                    for (const field in errors) {
+                        errorMessage += `${errors[field].join(', ')}\n`;
+                    }
+
+                    // Display the error message in SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Failed',
+                        text: errorMessage,
+                    });
+                } else {
+                    // Other errors, log them for debugging
+                    console.log(error);
+                }
+            }
+        }
+    },
+};
+</script>
 
 <style>
 .alert .modal-backdrop {
